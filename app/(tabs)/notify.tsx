@@ -18,7 +18,7 @@ import * as Location from 'expo-location';
 const NotifyScreen = () => {
   const insets = useSafeAreaInsets();
   const [sending, setSending] = useState(false);
-  const EMERGENCY_NUMBER = '+919693437679'; // Replace with actual emergency number
+  const EMERGENCY_NUMBER = '+919693437679';
 
   const requestLocationPermission = async () => {
     try {
