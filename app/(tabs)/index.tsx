@@ -29,7 +29,10 @@ export default function HomeScreen() {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getLastKnownPositionAsync({});
+        if (!location) {
+          location = await Location.getCurrentPositionAsync({});
+        }
       setLocation(location);
 
       // Fetch weather data
@@ -51,6 +54,47 @@ export default function HomeScreen() {
   }, []);
 
   const WeatherIcon = weather?.condition === 'sunny' ? Sun : Cloud;
+
+  const weatherAlerts: Record<string, { alert: string; tips: string[] }> = {
+  rain: {
+    alert: "Heavy Rain Warning in your area",
+    tips: [
+      "Carry an umbrella or raincoat",
+      "Avoid waterlogged areas",
+      "Drive slowly and carefully",
+      "Stay updated with weather reports",
+    ],
+  },
+  thunderstorm: {
+    alert: "Thunderstorm Alert! Stay indoors",
+    tips: [
+      "Avoid using electrical appliances",
+      "Do not take shelter under trees",
+      "Stay away from windows",
+      "Keep emergency lights handy",
+    ],
+  },
+  flood: {
+    alert: "Flash Flood Warning in your area",
+    tips: [
+      "Move to higher ground immediately",
+      "Avoid walking through moving water",
+      "Stay away from power lines",
+      "Keep emergency contacts handy",
+    ],
+  },
+  clear: {
+    alert: "Weather is clear. Stay safe!",
+    tips: [
+      "Stay hydrated",
+      "Wear sunscreen when outdoors",
+      "Enjoy your day responsibly",
+      "Check forecasts for upcoming changes",
+    ],
+  },
+};
+
+const alertInfo = weather?.condition ? weatherAlerts[weather.condition] : undefined;
 
   return (
     <ScrollView
@@ -96,27 +140,30 @@ export default function HomeScreen() {
           </MapView>
         </View>
       )}
+<View style={styles.alertsSection}>
+  <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Active Alert</Text>
+  <View style={styles.alertCard}>
+    <AlertTriangle size={24} color="#dc2626" />
+    <Text style={styles.alertText}>
+      {alertInfo ? alertInfo.alert : 'No active alerts'}
+    </Text>
+  </View>
+</View>
 
-      <View style={styles.alertsSection}>
-        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Active Alert</Text>
-        <View style={styles.alertCard}>
-          <AlertTriangle size={24} color="#dc2626" />
-          <Text style={styles.alertText}>Flash Flood Warning in your area</Text>
-        </View>
-      </View>
+<View style={styles.tipsSection}>
+  <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Safety Tips</Text>
+  <View style={styles.tipCard}>
+    <Text style={[styles.tipTitle, { color: currentTheme.text }]}>
+      {weather?.condition ? `During ${weather.condition.charAt(0).toUpperCase() + weather.condition.slice(1)}` : 'General Tips'}
+    </Text>
+    <Text style={[styles.tipText, { color: currentTheme.text }]}>
+      {alertInfo && typeof alertInfo !== 'string'
+        ? alertInfo.tips.map(tip => `• ${tip}\n`).join('')
+        : 'Stay prepared and stay safe!'}
+    </Text>
+  </View>
+</View>
 
-      <View style={styles.tipsSection}>
-        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Safety Tips</Text>
-        <View style={styles.tipCard}>
-          <Text style={[styles.tipTitle, { color: currentTheme.text }]}>During a Flood</Text>
-          <Text style={[styles.tipText, { color: currentTheme.text }]}>
-            • Move to higher ground immediately{'\n'}
-            • Avoid walking through moving water{'\n'}
-            • Stay away from power lines{'\n'}
-            • Keep emergency contacts handy
-          </Text>
-        </View>
-      </View>
 
      
     </ScrollView>
